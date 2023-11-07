@@ -9,7 +9,7 @@ from src.db.dicom.file.dicom_file_repository import InvalidDicomFileError
 from src.db.dicom.file.local_dicom_file_repository import LocalDicomFileRepository
 
 
-class MyTestCase(unittest.IsolatedAsyncioTestCase):
+class LocalDicomFileRepositoryTest(unittest.IsolatedAsyncioTestCase):
 
     def setUp(self) -> None:
         self.path = "/tmp"
