@@ -10,7 +10,7 @@ id='00010001'
 class SqlDicomTagRepository(DicomTagRepository):
     #ToDo: try catch and exception handling
 
-    def get(self, tag_id: str, dcm_id: int) -> DicomTag:
+    async def get(self, tag_id: str, dcm_id: int) -> DicomTag:
         properties = {
             "id": tag_id,
             "dicom_id": dcm_id
@@ -24,9 +24,10 @@ class SqlDicomTagRepository(DicomTagRepository):
 
         return DicomTag(id=sql_dicom_tag.id, value=sql_dicom_tag.value)
 
-    def save(self, dcm_id: str, tag: DicomTag):
+    async def save(self, dcm_id: str, tag: DicomTag):
         #What should we do if you cant save?
         scoped_session = ctx_session.get()
         sql_dicom_tag = SqlDicomTag(id=tag.id, dicom_id=dcm_id, value=tag.value)
         scoped_session.add(sql_dicom_tag)
         scoped_session.commit()
+        return

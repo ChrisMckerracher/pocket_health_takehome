@@ -4,7 +4,8 @@ install_requires = [
     "fastapi==0.104.1",
     "fastapi-login==1.9.1",
     "SQLAlchemy==2.0.23",
-    "pydicom==2.4.3"
+    "pydicom==2.4.3",
+    "python-multipart==0.0.6"
 ]
 
 setup(

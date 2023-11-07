@@ -9,7 +9,7 @@ class InvalidDicomFileError(Exception):
     pass
 
 class DicomFileRepository:
-    def get(self, id: int) -> str:
+    async def get(self, id: int) -> str:
         raise NotImplementedError("Failed to implement the interface for method get")
 
     async def save(self, id: int, file: UploadFile) -> SpooledTemporaryFile:

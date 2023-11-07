@@ -1,7 +1,6 @@
 import glob
 import os
 import unittest
-from typing import Any
 
 from fastapi import UploadFile
 

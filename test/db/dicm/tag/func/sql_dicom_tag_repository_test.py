@@ -2,7 +2,7 @@ import os
 import unittest
 
 from sqlalchemy import create_engine
-from src.db.dicom.dicom import DicomTag as SqlDicomTag, Dicom as SqlDicom, Base
+from src.db.dicom.dicom import Base
 from src.db.dicom.tag.sql_dicom_tag_repository import SqlDicomTagRepository
 from src.db.error.entity_not_found_error import EntityNotFoundError
 from src.domain.dicom.tag.dicom_tag import DicomTag
@@ -10,7 +10,6 @@ from src.db.session import ctx_session, SessionFactory
 
 
 class SqlDicomTagRepositoryTest(unittest.TestCase):
-
     tmp_sqlite_file = "/tmp/sql_app.db"
 
     def setUp(self) -> None:
@@ -38,12 +37,8 @@ class SqlDicomTagRepositoryTest(unittest.TestCase):
         dcm_tag = 1000
         expected_id = "00010001"
 
-
         with self.assertRaises(EntityNotFoundError):
             self.sut.get(expected_id, dcm_tag)
-
-
-
 
 
 if __name__ == '__main__':
