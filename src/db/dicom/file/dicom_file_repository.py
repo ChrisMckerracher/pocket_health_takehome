@@ -9,10 +9,10 @@ class InvalidDicomFileError(Exception):
     pass
 
 class DicomFileRepository:
-    async def get(self, id: int) -> str:
+    async def get(self, id: str) -> str:
         raise NotImplementedError("Failed to implement the interface for method get")
 
-    async def save(self, id: int, file: UploadFile) -> SpooledTemporaryFile:
+    async def save(self, id: str, file: UploadFile) -> SpooledTemporaryFile:
         mime_type = file.content_type
 
         if mime_type != VALID_MIME_TYPE:
@@ -21,5 +21,5 @@ class DicomFileRepository:
 
         return await self._save(id, file)
 
-    async def _save(self, id: int, file: UploadFile) -> SpooledTemporaryFile:
+    async def _save(self, id: str, file: UploadFile) -> SpooledTemporaryFile:
         raise NotImplementedError("Failed to implement the interface for method save")

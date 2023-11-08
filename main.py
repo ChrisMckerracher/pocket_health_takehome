@@ -29,23 +29,19 @@ async def main():
 
 
 @app.post("/dicom")
-async def post_file(body: UploadFile) -> int:
+async def post_file(body: UploadFile) -> str:
     #sha the file
-    id = uuid.uuid4().int & (2 ** 32 - 1)
+    id = uuid.uuid4().__str__()
 
     await environment.dicom_file_repository.save(id, body)
     await body.seek(0)
 
     #ToDo: test that the pixel dataset isnt read
     dcm = dcmread(fp=body.file, stop_before_pixels=True)
-    tag_ids = dcm.__dict__['_dict']
 
-    for tag_id in tag_ids:
-        tag_id: BaseTag
-        tag = dcm.get(tag_id)
-        str_val = tag.repval
-        tag_id = "{0:04x}{1:04x}".format(tag_id.group, tag_id.element)
-        dcm_tag = DicomTag(id=tag_id, value=str_val)
+    for key in dcm.keys():
+        item = dcm.get(key)
+        dcm_tag = DicomTag.from_data_element(item)
         await environment.dicom_tag_repository.save(dcm_id=id, tag=dcm_tag)
 
     return id
@@ -57,8 +53,13 @@ async def put_file(dicom_id: int, file: UploadFile):
 
 
 @app.get("/dicom/{dicom_id}/tag/{header_tag}")
-async def query_header(dicom_id: int, header_tag: str) -> DicomTag:
-    return await environment.dicom_tag_repository.get(header_tag, dicom_id)
+async def query_header(dicom_id: str, header_tag: str) -> DicomTag:
+    #ToDo: Better exception
+    if len(header_tag) != 8:
+        raise Exception()
+    group_id = int(header_tag[:4], 16)
+    element_id = int(header_tag[4:], 16)
+    return await environment.dicom_tag_repository.get(group_id, element_id, dicom_id)
 
 
 @app.get("/dicom/{dicom_id}?format={format}")

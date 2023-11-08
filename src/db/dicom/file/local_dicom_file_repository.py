@@ -15,7 +15,7 @@ class LocalDicomFileRepository(DicomFileRepository):
     def __init__(self, path: str = "/tmp"):
         self.path = path
 
-    def get(self, id: int) -> str:
+    def get(self, id: str) -> str:
         path = f"{self.path}/{id}.dcm"
 
         if os.path.exists(path):
@@ -23,7 +23,7 @@ class LocalDicomFileRepository(DicomFileRepository):
         else:
             raise FileNotFoundError()
 
-    async def _save(self, id: int, file: UploadFile) -> SpooledTemporaryFile:
+    async def _save(self, id: str, file: UploadFile) -> SpooledTemporaryFile:
         tmp_file: SpooledTemporaryFile = file.file
         remaining_bytes: Optional[int] = file.size
 

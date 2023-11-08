@@ -3,7 +3,7 @@ from src.domain.dicom.tag.dicom_tag import DicomTag
 
 class DicomTagRepository:
 
-    async def get(self, group_id: int, element_id: int, dcm_id: int) -> DicomTag:
+    async def get(self, group_id: int, element_id: int, dcm_id: str) -> DicomTag:
         raise NotImplementedError()
 
     async def save(self, dcm_id: str, tag: DicomTag):

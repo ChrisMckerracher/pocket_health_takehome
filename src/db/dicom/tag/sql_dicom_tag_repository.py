@@ -14,7 +14,7 @@ from src.domain.dicom.tag.dicom_tag import DicomTag
 class SqlDicomTagRepository(DicomTagRepository):
     # ToDo: try catch and exception handling
 
-    async def get(self, group_id: int, element_id: int, dcm_id: int) -> DicomTag:
+    async def get(self, group_id: int, element_id: int, dcm_id: str) -> DicomTag:
         properties = {
             "group_id": group_id,
             "element_id": element_id,
@@ -32,7 +32,7 @@ class SqlDicomTagRepository(DicomTagRepository):
             DataSetItem.tag_id == sql_dicom_tag.id).all()
         return transform(items)
 
-    async def save(self, dcm_id: int, tag: DicomTag):
+    async def save(self, dcm_id: str, tag: DicomTag):
         # What should we do if you cant save?
         scoped_session = ctx_session.get()
 
