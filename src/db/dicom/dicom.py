@@ -33,14 +33,15 @@ class Tag(Base):
 class DataSetItem(Base):
     __tablename__ = 'data'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(String, primary_key=True)
 
     group_id = Column(Integer)
     element_id = Column(Integer)
 
     tag_id = Column(ForeignKey("tag.id"))
     # 1 2 or 3...
-    data_set_id = Column(ForeignKey("dataset.id"))
+    data_set_id = Column(String)
+    parent_id = Column(ForeignKey("data.id"))
     # 1 2 or 3...
     sq = Column(Integer)
 
@@ -51,19 +52,8 @@ class DataSetItem(Base):
         ForeignKeyConstraint(['group_id', 'element_id'], ['taglookup.group_id', 'taglookup.element_id']),
     )
 
-    data_set = relationship("DataSet",
-                            primaryjoin="DataSetItem.data_set_id == DataSet.id")
     tag_lookup = relationship("TagLookup",
                               primaryjoin="and_(DataSetItem.group_id == TagLookup.group_id, DataSetItem.element_id == TagLookup.element_id)")
-
-
-class DataSet(Base):
-    __tablename__ = 'dataset'
-
-    id = Column(String, primary_key=True)
-
-    parent_data_set_id = Column(ForeignKey("dataset.id"))
-
 
 class TagLookup(Base):
     __tablename__ = "taglookup"
