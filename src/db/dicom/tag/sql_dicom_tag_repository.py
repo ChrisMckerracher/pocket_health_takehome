@@ -1,3 +1,4 @@
+import json
 from typing import Optional, List
 from uuid import uuid4, UUID
 
@@ -22,14 +23,13 @@ class SqlDicomTagRepository(DicomTagRepository):
 
         # ToDo: n+1 query
         sql_dicom_tag: Optional[Tag] = scoped_session.query(Tag).get(properties)
-        items: List[DataSetItem] = scoped_session.query(DataSetItem).filter(
-            DataSetItem.tag_id == sql_dicom_tag.id).all()
-        return transform(items)
 
         if not sql_dicom_tag:
             raise EntityNotFoundError(properties=properties)
 
-        return DicomTag(id=sql_dicom_tag.id, value=sql_dicom_tag.value)
+        items: List[DataSetItem] = scoped_session.query(DataSetItem).filter(
+            DataSetItem.tag_id == sql_dicom_tag.id).all()
+        return transform(items)
 
     async def save(self, dcm_id: int, tag: DicomTag):
         # What should we do if you cant save?
@@ -37,16 +37,16 @@ class SqlDicomTagRepository(DicomTagRepository):
 
         id = uuid4().__str__()
         tag_id = uuid4().__str__()
-        self.add_tag(scoped_session, tag.group_id, tag.element_id, tag.vr, tag.name)
+        self.add_tag_data(scoped_session, tag.group_id, tag.element_id, tag.vr, tag.name)
         scoped_session.add(Tag(id=tag_id, group_id=tag.group_id, element_id=tag.element_id, dicom_id=dcm_id))
         sql_dicom_tag = DataSetItem(id=id, group_id=tag.group_id, element_id=tag.element_id, tag_id=tag_id,
-                                    data_set_id=None, parent_id=None, sq=1)
+                                    data_set_id=None, parent_id=None, vm=tag.vm, sq=1)
 
         if tag.vr == "SQ":
             datasets: List[List[DicomTag]] = tag.value
             self.add_recursive_datasets(scoped_session, datasets, tag_id, id)
         else:
-            sql_dicom_tag.value = tag.value
+            sql_dicom_tag.value = json.dumps(tag.value)
         scoped_session.add(sql_dicom_tag)
         scoped_session.commit()
         return
@@ -60,18 +60,18 @@ class SqlDicomTagRepository(DicomTagRepository):
                 sql_dicom_tag = DataSetItem(id=id, parent_id=parent_id, group_id=tag.group_id,
                                             element_id=tag.element_id,
                                             tag_id=tag_id,
-                                            data_set_id=dataset_id, sq=1)
+                                            data_set_id=dataset_id, vm=tag.vm)
 
                 if tag.vr == "SQ":
                     datasets: List[List[DicomTag]] = tag.value
                     self.add_recursive_datasets(scoped_session, datasets, tag_id, id)
                 else:
-                    sql_dicom_tag.value = tag.value
+                    sql_dicom_tag.value = json.dumps(tag.value)
 
-                self.add_tag(scoped_session, tag.group_id, tag.element_id, tag.vr, tag.name)
+                self.add_tag_data(scoped_session, tag.group_id, tag.element_id, tag.vr, tag.name)
                 scoped_session.add(sql_dicom_tag)
 
-    def add_tag(self, scoped_session, group_id, element_id, vr, name):
+    def add_tag_data(self, scoped_session, group_id, element_id, vr, name):
         if not scoped_session.query(TagLookup).get({
             "group_id": group_id,
             "element_id": element_id

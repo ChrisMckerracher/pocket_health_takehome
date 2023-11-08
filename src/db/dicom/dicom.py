@@ -44,6 +44,7 @@ class DataSetItem(Base):
     parent_id = Column(ForeignKey("data.id"))
     # 1 2 or 3...
     sq = Column(Integer)
+    vm = Column(Integer)
 
     # sqllite doesnt support array
     value = Column(String)

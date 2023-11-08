@@ -1,3 +1,4 @@
+import json
 from collections import defaultdict
 from dataclasses import dataclass, field
 from operator import attrgetter
@@ -45,9 +46,10 @@ def traverse_tree(root: DataSetTreeNode, dataset_map: Dict[str, DataSetItem]) ->
                                        value = children
                         )
     else:
-        return DicomTag[str](group_id=dataset_item.group_id, element_id=dataset_item.element_id,
+        return DicomTag(group_id=dataset_item.group_id, element_id=dataset_item.element_id,
                              vr=dataset_item.tag_lookup.vr, name=dataset_item.tag_lookup.name,
-                                       value = dataset_item.value
+                             vm=dataset_item.vm,
+                                       value = dataset_item.value if dataset_item.vm == 1 else json.loads(dataset_item.value)
                         )
 
 

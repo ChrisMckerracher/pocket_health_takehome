@@ -1,6 +1,6 @@
 import os
 import unittest
-from typing import List, ForwardRef
+from typing import List
 
 from sqlalchemy import create_engine
 from src.db.dicom.dicom import Base
@@ -13,6 +13,16 @@ from src.db.session import ctx_session, SessionFactory
 class LocalDicomFileRepositoryTest(unittest.IsolatedAsyncioTestCase):
     tmp_sqlite_file = "/tmp/sql_app.db"
 
+    class Helper:
+        @staticmethod
+        async def test_save_and_get(self, expected: DicomTag):
+            dcm_tag = 1
+            await self.sut.save(dcm_tag, expected)
+
+            actual = await self.sut.get(expected.group_id, expected.element_id, dcm_tag)
+
+            self.assertEquals(expected, actual)
+
     def setUp(self) -> None:
         engine = create_engine(f"sqlite:///{self.tmp_sqlite_file}")
         Base.metadata.create_all(engine)
@@ -22,15 +32,14 @@ class LocalDicomFileRepositoryTest(unittest.IsolatedAsyncioTestCase):
     def tearDown(self) -> None:
         os.remove(self.tmp_sqlite_file)
 
-    async def test_save_and_get(self):
-        dcm_tag = 1
+    async def test_basic_save_and_get(self):
+        LocalDicomFileRepositoryTest.Helper.test_save_and_get(self, self.create_basic_tag())
 
-        expected = self.create_complex_tag()
-        await self.sut.save(dcm_tag, expected)
+    async def test_complex_save_and_get(self):
+        LocalDicomFileRepositoryTest.Helper.test_save_and_get(self, self.create_complex_tag())
 
-        actual = await self.sut.get(expected.group_id, expected.element_id, dcm_tag)
-
-        self.assertEquals(expected, actual)
+    async def test_save_and_get_list_non_sq(self):
+        LocalDicomFileRepositoryTest.Helper.test_save_and_get(self, self.create_list_tag())
 
     async def test_get_invalid_key(self):
         dcm_tag = 1000
@@ -39,6 +48,17 @@ class LocalDicomFileRepositoryTest(unittest.IsolatedAsyncioTestCase):
 
         with self.assertRaises(EntityNotFoundError):
             await self.sut.get(expected_group_id, expected_element_id, dcm_tag)
+
+    @staticmethod
+    def create_basic_tag() -> DicomTag[str]:
+        return DicomTag[str](group_id=8, element_id=4432,
+                             name="Referenced SOP Class UID", vr="UI",
+                             value='1')
+
+    @staticmethod
+    def create_list_tag() -> DicomTag[List[int]]:
+        return DicomTag[List[int]](group_id=8, element_id=4416, name="Referenced Image Sequence", vr="SL", vm=4,
+                                   value=[1, 3, 5, 7])
 
     @staticmethod
     def create_complex_tag() -> DicomTag[List[DataSet]]:
@@ -64,9 +84,9 @@ class LocalDicomFileRepositoryTest(unittest.IsolatedAsyncioTestCase):
                                                DicomTag[str](group_id=8, element_id=4432,
                                                              name="Referenced SOP Class UID", vr="UI",
                                                              value='1.2.840.10008.5.1.4.1.1.4'),
-                                               DicomTag[str](group_id=8, element_id=4437,
-                                                             name="Referenced SOP Instance UID", vr="UI",
-                                                             value='1.3.12.2.1107.5.2.6.24119.30000013121716094326500000390')
+                                               DicomTag[List[int]](group_id=8, element_id=4410,
+                                                                   name="Referenced Image Sequence", vr="SL", vm=4,
+                                                                   value=[1, 3, 5, 7])
                                            ],
                                            [
                                                DicomTag[List[DataSet]](group_id=8, element_id=4416,
