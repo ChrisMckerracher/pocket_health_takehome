@@ -9,6 +9,7 @@ from src.db.session import ctx_session
 from src.domain.dicom.tag.sql_tag_transformer import transform
 from src.domain.dicom.tag.dicom_tag import DicomTag
 
+#transaction
 
 class SqlDicomTagRepository(DicomTagRepository):
     # ToDo: try catch and exception handling

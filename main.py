@@ -30,6 +30,7 @@ async def main():
 
 @app.post("/dicom")
 async def post_file(body: UploadFile) -> int:
+    #sha the file
     id = uuid.uuid4().int & (2 ** 32 - 1)
 
     await environment.dicom_file_repository.save(id, body)

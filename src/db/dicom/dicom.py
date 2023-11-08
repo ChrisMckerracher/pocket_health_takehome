@@ -14,6 +14,7 @@ class Dicom(Base):
     patient_id = Column(String)  # Column(ForeignKey("patient.id"))
     name = Column(String)
     file_path = Column(String)
+    #cascading delete
 
 
 class Tag(Base):

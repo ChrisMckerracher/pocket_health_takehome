@@ -16,6 +16,19 @@ class MyTestCase(unittest.TestCase):
         print(len(values.keys()))
         for key in values.keys():
             thing = ds.get(key=key)
+            print(DicomTag.from_data_element(thing))
+            print({
+                "group_id": thing.tag.group,
+                "element_id": thing.tag.element,
+                "vr": thing.VR,
+                "vm": thing.VM,
+                "name": thing.name,
+                "value": thing.value
+
+            })
+            if thing.tag.group == 8 and thing.tag.element == 144:
+                DicomTag.from_data_element(thing)
+                print("a")
             if thing.VM > 1:
                 print(thing)
             if key.group >= 32736:
