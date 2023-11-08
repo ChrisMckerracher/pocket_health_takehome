@@ -2,7 +2,7 @@ from typing import Dict
 
 from pydicom import FileDataset
 
-from src.db.dicom.dicom import DicomTag
+from src.domain.dicom.tag.dicom_tag import DicomTag
 
 
 class DicomTagExtractor:

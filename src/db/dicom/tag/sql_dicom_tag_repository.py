@@ -1,33 +1,69 @@
-from typing import Optional
+from typing import Optional, List
+from uuid import uuid4, UUID
 
-from src.db.dicom.dicom import DicomTag as SqlDicomTag
+from src.db.dicom.dicom import DataSetItem, DataSet, Tag
 from src.db.dicom.tag.dicom_tag_repository import DicomTagRepository
 from src.db.error.entity_not_found_error import EntityNotFoundError
 from src.db.session import ctx_session
+from src.domain.dicom.tag.SQLTagTransformer import transform
 from src.domain.dicom.tag.dicom_tag import DicomTag
-dicom_id=1
-id='00010001'
-class SqlDicomTagRepository(DicomTagRepository):
-    #ToDo: try catch and exception handling
 
-    async def get(self, tag_id: str, dcm_id: int) -> DicomTag:
+
+class SqlDicomTagRepository(DicomTagRepository):
+    # ToDo: try catch and exception handling
+
+    async def get(self, group_id: int, element_id: int, dcm_id: int) -> DicomTag:
         properties = {
-            "id": tag_id,
+            "group_id": group_id,
+            "element_id": element_id,
             "dicom_id": dcm_id
         }
         scoped_session = ctx_session.get()
 
-        sql_dicom_tag: Optional[SqlDicomTag] = scoped_session.query(SqlDicomTag).get(properties)
+        # ToDo: n+1 query
+        sql_dicom_tag: Optional[Tag] = scoped_session.query(Tag).get(properties)
+        items: List[DataSetItem] = scoped_session.query(DataSetItem).filter(
+            DataSetItem.tag_id == sql_dicom_tag.id).all()
+        return transform(items)
 
         if not sql_dicom_tag:
             raise EntityNotFoundError(properties=properties)
 
         return DicomTag(id=sql_dicom_tag.id, value=sql_dicom_tag.value)
 
-    async def save(self, dcm_id: str, tag: DicomTag):
-        #What should we do if you cant save?
+    async def save(self, dcm_id: int, tag: DicomTag):
+        # What should we do if you cant save?
         scoped_session = ctx_session.get()
-        sql_dicom_tag = SqlDicomTag(id=tag.id, dicom_id=dcm_id, value=tag.value)
+
+        dataset_id = uuid4().__str__()
+        tag_id = uuid4().__str__()
+        scoped_session.add(Tag(id=tag_id, group_id=tag.group_id, element_id=tag.element_id, dicom_id=dcm_id))
+        scoped_session.add(DataSet(id=dataset_id, parent_data_set_id=None))
+        sql_dicom_tag = DataSetItem(group_id=tag.group_id, element_id=tag.element_id, tag_id=tag_id,
+                                    data_set_id=dataset_id, sq=1)
+
+        if tag.vr == "SQ":
+            datasets: List[List[DicomTag]] = tag.value
+            self.add_recursive_datasets(scoped_session, datasets, tag_id, dataset_id)
+        else:
+            sql_dicom_tag.value = tag.value
         scoped_session.add(sql_dicom_tag)
         scoped_session.commit()
         return
+
+    def add_recursive_datasets(self, scoped_session, datasets: List[List[DicomTag]], tag_id: str, parent_data_set_id: str):
+
+        for dataset in datasets:
+            dataset_id = uuid4().__str__()
+            scoped_session.add(DataSet(id=dataset_id, parent_data_set_id=parent_data_set_id))
+            for tag in dataset:
+                sql_dicom_tag = DataSetItem(group_id=tag.group_id, element_id=tag.element_id, tag_id=tag_id,
+                                            data_set_id=dataset_id, sq=1)
+
+                if tag.vr == "SQ":
+                    datasets: List[List[DicomTag]] = tag.value
+                    self.add_recursive_datasets(datasets, tag_id, dataset_id)
+                else:
+                    sql_dicom_tag.value = tag.value
+
+                scoped_session.add(sql_dicom_tag)

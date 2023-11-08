@@ -1,5 +1,6 @@
 import os
 import unittest
+from typing import List
 
 from sqlalchemy import create_engine
 from src.db.dicom.dicom import Base
@@ -9,7 +10,7 @@ from src.domain.dicom.tag.dicom_tag import DicomTag
 from src.db.session import ctx_session, SessionFactory
 
 
-class SqlDicomTagRepositoryTest(unittest.TestCase):
+class LocalDicomFileRepositoryTest(unittest.IsolatedAsyncioTestCase):
     tmp_sqlite_file = "/tmp/sql_app.db"
 
     def setUp(self) -> None:
@@ -21,24 +22,56 @@ class SqlDicomTagRepositoryTest(unittest.TestCase):
     def tearDown(self) -> None:
         os.remove(self.tmp_sqlite_file)
 
-    def test_save_and_get(self):
+    async def test_save_and_get(self):
         dcm_tag = 1
-        expected_id = "00010001"
+        expected_group_id = 1
+        expected_element_id = 1
         expected_value = "3"
 
-        expected = DicomTag(id=expected_id, value=expected_value)
-        self.sut.save(dcm_tag, expected)
+        expected = self.create_complex_tag()
+        await self.sut.save(dcm_tag, expected)
 
-        actual = self.sut.get(expected_id, dcm_tag)
+        actual = await self.sut.get(expected.group_id, expected.element_id, dcm_tag)
 
         self.assertEquals(expected, actual)
 
-    def test_get_invalid_key(self):
+    async def test_get_invalid_key(self):
         dcm_tag = 1000
-        expected_id = "00010001"
+        expected_group_id = 1
+        expected_element_id = 1
 
         with self.assertRaises(EntityNotFoundError):
-            self.sut.get(expected_id, dcm_tag)
+            await self.sut.get(expected_group_id, expected_element_id, dcm_tag)
+
+    @staticmethod
+    def create_complex_tag() -> DicomTag[List[List[DicomTag]]]:
+        return DicomTag[List[List[DicomTag]]](group_id=8, element_id=4416, name="Referenced Image Sequence", vr="SQ",
+                                              value=[
+                                                  [
+                                                      DicomTag[str](group_id=8, element_id=4432,
+                                                                    name="Referenced SOP Class UID", vr="UI",
+                                                                    value='1.2.840.10008.5.1.4.1.1.4'),
+                                                      DicomTag[str](group_id=8, element_id=4437,
+                                                                    name="Referenced SOP Instance UID", vr="UI",
+                                                                    value='1.3.12.2.1107.5.2.6.24119.30000013121716094326500000391')
+                                                  ],
+                                                  [
+                                                      DicomTag[str](group_id=8, element_id=4432,
+                                                                    name="Referenced SOP Class UID", vr="UI",
+                                                                    value='1.2.840.10008.5.1.4.1.1.4'),
+                                                      DicomTag[str](group_id=8, element_id=4437,
+                                                                    name="Referenced SOP Instance UID", vr="UI",
+                                                                    value='1.3.12.2.1107.5.2.6.24119.30000013121716094326500000392')
+                                                  ],
+                                                  [
+                                                      DicomTag(group_id=8, element_id=4432,
+                                                               name="Referenced SOP Class UID", vr="UI",
+                                                               value='1.2.840.10008.5.1.4.1.1.4'),
+                                                      DicomTag(group_id=8, element_id=4437,
+                                                               name="Referenced SOP Instance UID", vr="UI",
+                                                               value='1.3.12.2.1107.5.2.6.24119.30000013121716094326500000390')
+                                                  ]
+                                              ])
 
 
 if __name__ == '__main__':
