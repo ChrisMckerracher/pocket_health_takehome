@@ -14,7 +14,7 @@ class Dicom(Base):
     patient_id = Column(String)  # Column(ForeignKey("patient.id"))
     name = Column(String)
     file_path = Column(String)
-    # cascading delete
+    # ToDo: implement cascading delete
 
 
 class ImageData(Base):

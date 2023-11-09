@@ -33,13 +33,13 @@ class LocalDicomFileRepositoryTest(unittest.IsolatedAsyncioTestCase):
         os.remove(self.tmp_sqlite_file)
 
     async def test_basic_save_and_get(self):
-        LocalDicomFileRepositoryTest.Helper.test_save_and_get(self, self.create_basic_tag())
+        await LocalDicomFileRepositoryTest.Helper.test_save_and_get(self, self.create_basic_tag())
 
     async def test_complex_save_and_get(self):
-        LocalDicomFileRepositoryTest.Helper.test_save_and_get(self, self.create_complex_tag())
+        await LocalDicomFileRepositoryTest.Helper.test_save_and_get(self, self.create_complex_tag())
 
     async def test_save_and_get_list_non_sq(self):
-        LocalDicomFileRepositoryTest.Helper.test_save_and_get(self, self.create_list_tag())
+        await LocalDicomFileRepositoryTest.Helper.test_save_and_get(self, self.create_list_tag())
 
     async def test_get_invalid_key(self):
         dcm_tag = 1000

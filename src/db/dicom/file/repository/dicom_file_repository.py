@@ -32,7 +32,7 @@ class DicomFileRepository:
             raise InvalidDicomFileError()
 
 
-        file_path = await self._save(id, file)
+        file_path = await self._save(dicom_id, file)
         session = ctx_session.get()
         session.add(Dicom(id=dicom_id, name=name, patient_id=patient_id, file_path=file_path))
         session.commit()

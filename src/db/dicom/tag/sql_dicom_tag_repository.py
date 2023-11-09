@@ -1,5 +1,5 @@
 import json
-from typing import Optional, List
+from typing import Optional, List, get_args
 from uuid import uuid4, UUID
 
 from src.db.dicom.dicom import DataSetItem, Tag, TagLookup
@@ -7,7 +7,8 @@ from src.db.dicom.tag.dicom_tag_repository import DicomTagRepository
 from src.db.error.entity_not_found_error import EntityNotFoundError
 from src.db.session import ctx_session
 from src.domain.dicom.tag.sql_tag_transformer import transform
-from src.domain.dicom.tag.dicom_tag import DicomTag
+from src.domain.dicom.tag.dicom_tag import DicomTag, literals_T
+
 
 #transaction
 
@@ -47,7 +48,7 @@ class SqlDicomTagRepository(DicomTagRepository):
             datasets: List[List[DicomTag]] = tag.value
             self.add_recursive_datasets(scoped_session, datasets, tag_id, id)
         else:
-            sql_dicom_tag.value = json.dumps(tag.value)
+            sql_dicom_tag.value = tag.value if isinstance(tag.value, get_args(literals_T)) else json.dumps(tag.value)
         scoped_session.add(sql_dicom_tag)
         scoped_session.commit()
         return
@@ -67,7 +68,7 @@ class SqlDicomTagRepository(DicomTagRepository):
                     datasets: List[List[DicomTag]] = tag.value
                     self.add_recursive_datasets(scoped_session, datasets, tag_id, id)
                 else:
-                    sql_dicom_tag.value = json.dumps(tag.value)
+                    sql_dicom_tag.value = tag.value if isinstance(tag.value, get_args(literals_T)) else json.dumps(tag.value)
 
                 self.add_tag_data(scoped_session, tag.group_id, tag.element_id, tag.vr, tag.name)
                 scoped_session.add(sql_dicom_tag)
