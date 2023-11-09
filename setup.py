@@ -8,7 +8,8 @@ install_requires = [
     "python-multipart==0.0.6",
     "deepdiff==6.7.0",
     "numpy==1.26.1",
-    "pillow==10.1.0"
+    "pillow==10.1.0",
+    "uvicorn==0.24.0.post1"
 ]
 
 setup(

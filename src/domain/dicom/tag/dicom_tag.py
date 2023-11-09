@@ -4,6 +4,7 @@ from typing import Union, List, ForwardRef, Generic, TypeVar, get_args
 from deepdiff import DeepDiff
 from pydantic import BaseModel
 from pydicom import DataElement, Dataset
+from pydicom.multival import MultiValue
 
 DataSet = List[ForwardRef("DicomTag")]
 literals_T = Union[str, int, float, bytes]
@@ -49,9 +50,9 @@ class DicomTag(BaseModel, Generic[T]):
             # stuff like PersonName isnt any of the valid types, therefore we just want to simplify the representation
             val_type = type(tag.value)
             # you cant check is_instance against generic types like List. We assuime the list data is well formed, as we assume pydicom gave us a well formed value
-            if val_type is list and len(tag.value):
-                val_type = type(tag.value[0])
-
-            value = tag.value if isinstance(val_type, get_args(literals_T)) else str(tag.value)
+            if val_type is list or val_type is MultiValue and len(tag.value):
+                value = [x if isinstance(x, get_args(literals_T)) else str(x) for x in tag.value]
+            else:
+                value = tag.value if isinstance(val_type, get_args(literals_T)) else str(tag.value)
 
         return DicomTag(group_id=group_id, element_id=element_id, vr=vr, vm=vm, name=name, value=value)

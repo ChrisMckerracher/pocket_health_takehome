@@ -17,21 +17,15 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from src.server.env import create_dev_environment, Environment
 
 environment: Environment = create_dev_environment()
+# Normally I would do this in a cli, but this is 'functionally' a no-op if the tables are already created, with the
+# caveat that doing a table orm update requires deleting the sqlite file and restarting server
 Base.metadata.create_all(environment.engine)
 ctx_session.set(SessionFactory(environment.engine))
 
 
-@app.get("/")
-async def main():
-    def iterfile():  #
-        with open("png", mode="rb") as file_like:  #
-            yield from file_like  #
-
-    return StreamingResponse(iterfile(), media_type="image/png")
-
-
 @app.post("/patient/{patient_id}/dicom")
 async def post_file(patient_id: str, body: UploadFile, access_token: Annotated[str | None, Header()] = None) -> str:
+    # ToDo: sha hash of existing file with this to ensure no redundancy
     assert_permission(access_token, patient_id)
 
     # sha the file
