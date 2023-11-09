@@ -11,6 +11,7 @@ class MyTestCase(unittest.TestCase):
     def test_something(self):
         file = open("../assets/IM000001.dcm", "rb")
         ds = dcmread(fp=file)
+        ds.pixel_array
         # ds.get()
         values = ds.__dict__['_dict']
         print(len(values.keys()))

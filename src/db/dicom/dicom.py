@@ -1,5 +1,5 @@
 from sqlalchemy import Column, ARRAY, Integer, String, ForeignKey, Uuid, PrimaryKeyConstraint, ForeignKeyConstraint, \
-    UniqueConstraint
+    UniqueConstraint, LargeBinary
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -14,7 +14,18 @@ class Dicom(Base):
     patient_id = Column(String)  # Column(ForeignKey("patient.id"))
     name = Column(String)
     file_path = Column(String)
-    #cascading delete
+    # cascading delete
+
+
+class ImageData(Base):
+    __tablename__ = 'imagedata'
+
+    dicom_id = Column(ForeignKey("dicom.id"))
+    file_path = Column(String)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('dicom_id'),
+    )
 
 
 class Tag(Base):
@@ -27,7 +38,6 @@ class Tag(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint('group_id', 'element_id', 'dicom_id'),
-
     )
 
 
@@ -56,6 +66,7 @@ class DataSetItem(Base):
 
     tag_lookup = relationship("TagLookup",
                               primaryjoin="and_(DataSetItem.group_id == TagLookup.group_id, DataSetItem.element_id == TagLookup.element_id)")
+
 
 class TagLookup(Base):
     __tablename__ = "taglookup"

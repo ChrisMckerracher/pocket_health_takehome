@@ -6,7 +6,9 @@ install_requires = [
     "SQLAlchemy==2.0.23",
     "pydicom==2.4.3",
     "python-multipart==0.0.6",
-    "deepdiff==6.7.0"
+    "deepdiff==6.7.0",
+    "numpy==1.26.1",
+    "pillow==10.1.0"
 ]
 
 setup(

@@ -1,16 +1,15 @@
-from typing import Any, Tuple
-
 import uvicorn
-from fastapi import UploadFile, Request
-from pydicom.tag import BaseTag
+from fastapi import UploadFile
 
 from src.db.dicom.dicom import Base
 from src.db.session import ctx_session, SessionFactory
+from src.domain.dicom.file.dicom_format import DicomFormat
+from src.domain.dicom.img.image_converter import ImageConverter
 from src.domain.dicom.tag.dicom_tag import DicomTag
 from src.server import app
-from fastapi.responses import StreamingResponse
 import uuid
 from pydicom import dcmread
+from fastapi.responses import StreamingResponse
 
 from src.server.env import create_dev_environment, Environment
 
@@ -28,15 +27,15 @@ async def main():
     return StreamingResponse(iterfile(), media_type="image/png")
 
 
-@app.post("/dicom")
-async def post_file(body: UploadFile) -> str:
-    #sha the file
+@app.post("/patient/{patient_id}/dicom")
+async def post_file(patient_id: str, body: UploadFile) -> str:
+    # sha the file
     id = uuid.uuid4().__str__()
 
-    await environment.dicom_file_repository.save(id, body)
+    await environment.dicom_file_repository.save(patient_id, body.filename, id, body)
     await body.seek(0)
 
-    #ToDo: test that the pixel dataset isnt read
+    # ToDo: test that the pixel dataset isnt read
     dcm = dcmread(fp=body.file, stop_before_pixels=True)
 
     for key in dcm.keys():
@@ -46,15 +45,9 @@ async def post_file(body: UploadFile) -> str:
 
     return id
 
-
-@app.put("/dicom")
-async def put_file(dicom_id: int, file: UploadFile):
-    pass
-
-
-@app.get("/dicom/{dicom_id}/tag/{header_tag}")
-async def query_header(dicom_id: str, header_tag: str) -> DicomTag:
-    #ToDo: Better exception
+@app.get("/patient/{patient_id}/dicom/{dicom_id}/tag/{header_tag}")
+async def query_header(patient_id: str, dicom_id: str, header_tag: str) -> DicomTag:
+    # ToDo: Better exception
     if len(header_tag) != 8:
         raise Exception()
     group_id = int(header_tag[:4], 16)
@@ -62,9 +55,29 @@ async def query_header(dicom_id: str, header_tag: str) -> DicomTag:
     return await environment.dicom_tag_repository.get(group_id, element_id, dicom_id)
 
 
-@app.get("/dicom/{dicom_id}?format={format}")
-async def get(dicom_id: int, format=Any) -> Any:
-    pass
+@app.get("/patient/{patient_id}/dicom/{dicom_id}")
+async def get(patient_id: str, dicom_id: str, format: DicomFormat) -> StreamingResponse:
+    file_path: str
+
+    def generator(file):
+        yield from file
+
+    match format:
+        case DicomFormat.DCM:
+            file_path = await environment.dicom_file_repository.get(dicom_id)
+
+            return StreamingResponse(generator(open(file_path, "rb")), media_type="application/dicom")
+        case DicomFormat.PNG:
+            try:
+                file_path = await environment.dicom_img_repository.get(dicom_id)
+            except FileNotFoundError:
+                file_path = await environment.dicom_file_repository.get(dicom_id)
+                file = dcmread(file_path)
+                image = ImageConverter.convert(file.pixel_array)
+                file_path = await environment.dicom_img_repository.save(dicom_id, image)
+            return StreamingResponse(generator(open(file_path, "rb")), media_type="image/png")
+
+    return None
 
 
 if __name__ == "__main__":

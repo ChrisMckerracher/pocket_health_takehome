@@ -4,8 +4,8 @@ import unittest
 
 from fastapi import UploadFile
 
-from src.db.dicom.file.dicom_file_repository import InvalidDicomFileError
-from src.db.dicom.file.local_dicom_file_repository import LocalDicomFileRepository
+from src.db.dicom.file.repository.dicom_file_repository import InvalidDicomFileError
+from src.db.dicom.file.repository.local_dicom_file_repository import LocalDicomFileRepository
 
 
 class LocalDicomFileRepositoryTest(unittest.IsolatedAsyncioTestCase):
