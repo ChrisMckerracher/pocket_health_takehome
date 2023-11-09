@@ -144,8 +144,9 @@ Of course, this recursive structure only happens if you have VR=SQ, and its chil
 
 Wrapping my head around this relationship and understanding how to ultimately map this recursive relationship ended up being a lot of fun. At a high level here is what a somewhat normalized SQL Table design can look like to account for this:
 
+![Screenshot 2023-11-09 at 11 50 37 AM](https://github.com/ChrisMckerracher/pocket_health_takehome/assets/5733725/111e8798-1b9a-47a8-8e8b-8151d697026c)
 
-![image](https://github.com/ChrisMckerracher/pocket_health_takehome/assets/5733725/9df40a74-7079-4368-8e27-a2212682d97d) 
+
 
 I denormalized the dataset table and put that into datasetitem, as it seemed reundant. This in otherwords giving a FK-PK recursive relationship with datasetitem and itself.
 
