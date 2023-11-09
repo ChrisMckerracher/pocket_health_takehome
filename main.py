@@ -28,7 +28,7 @@ class Message(BaseModel):
     message: str
 
 
-@app.post("/patient/{patient_id}/dicom", responses={404: {"model": Message}, 401: {"model": Message}})
+@app.post("/patient/{patient_id}/dicom", responses={404: {"model": Message}, 401: {"model": Message}, 422: {"model": Message}})
 async def post_file(patient_id: str, body: UploadFile, access_token: Annotated[str | None, Header()] = None) -> str:
     """
     Upload a dicom file
@@ -39,6 +39,10 @@ async def post_file(patient_id: str, body: UploadFile, access_token: Annotated[s
     """
     # ToDo: sha hash of existing file with this to ensure no redundancy
     try:
+        if body.size < 300:
+            return JSONResponse(status_code=422, content={
+                "message": "Invalid file"})
+
         assert_permission(access_token, patient_id)
 
         # sha the file

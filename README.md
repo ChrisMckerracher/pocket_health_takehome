@@ -60,6 +60,7 @@ body: FormData file upload, with specified content-type equlling application/dic
 |---|---|
 |200|Successful Response|
 |401|Unauthorized|
+|422|Validation Error|
 
 
 ## GET a Dicom Tag
