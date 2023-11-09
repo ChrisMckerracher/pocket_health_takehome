@@ -72,7 +72,7 @@ class LocalDicomFileRepositoryTest(unittest.IsolatedAsyncioTestCase):
         expected = open(original_file_path, "rb")
         actual = open(uploaded_file_path, "rb")
 
-        self.assertEquals(expected.read(), actual.read())
+        self.assertEqual(expected.read(), actual.read())
 
 
 if __name__ == '__main__':

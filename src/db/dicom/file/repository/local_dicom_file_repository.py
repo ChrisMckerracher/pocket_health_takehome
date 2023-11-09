@@ -1,5 +1,3 @@
-import os.path
-from tempfile import SpooledTemporaryFile
 from typing import Optional
 
 from fastapi import UploadFile
@@ -17,7 +15,6 @@ class LocalDicomFileRepository(DicomFileRepository):
 
     async def _save(self, dcm_id: str, file: UploadFile) -> str:
         path = f"{self.path}/{dcm_id}.dcm"
-        tmp_file: SpooledTemporaryFile = file.file
         remaining_bytes: Optional[int] = file.size
 
         if not remaining_bytes:

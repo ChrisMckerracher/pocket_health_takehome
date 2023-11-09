@@ -3,11 +3,12 @@ import unittest
 from typing import List
 
 from sqlalchemy import create_engine
+
 from src.db.dicom.dicom import Base
 from src.db.dicom.tag.sql_dicom_tag_repository import SqlDicomTagRepository
 from src.db.error.entity_not_found_error import EntityNotFoundError
-from src.domain.dicom.tag.dicom_tag import DicomTag, DataSet
 from src.db.session import ctx_session, SessionFactory
+from src.domain.dicom.tag.dicom_tag import DicomTag, DataSet
 
 
 class LocalDicomFileRepositoryTest(unittest.IsolatedAsyncioTestCase):
@@ -21,7 +22,7 @@ class LocalDicomFileRepositoryTest(unittest.IsolatedAsyncioTestCase):
 
             actual = await self.sut.get(expected.group_id, expected.element_id, dcm_tag)
 
-            self.assertEquals(expected, actual)
+            self.assertEqual(expected, actual)
 
     def setUp(self) -> None:
         engine = create_engine(f"sqlite:///{self.tmp_sqlite_file}")

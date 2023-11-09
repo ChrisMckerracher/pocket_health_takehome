@@ -6,7 +6,6 @@ from src.domain.dicom.tag.dicom_tag import DicomTag
 
 
 class DicomTagTest(unittest.TestCase):
-
     class Helper:
 
         @staticmethod

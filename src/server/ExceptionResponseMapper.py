@@ -14,7 +14,7 @@ def map_exception(e: Exception):
             "message": "File not found for entity"})
     elif e_type is EntityNotFoundError:
         return JSONResponse(status_code=404, content={
-            "message": "File not found for entity"})
+            "message": "Entity not found"})
     elif e_type is AccessViolationException:
         return JSONResponse(status_code=401, content={
             "message": "Invalid access token for this patient"
@@ -23,4 +23,3 @@ def map_exception(e: Exception):
         return JSONResponse(status_code=500, content={
             "message": "An unmapped server error has occured. Please notify an admin."
         })
-

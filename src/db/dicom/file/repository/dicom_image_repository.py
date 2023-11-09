@@ -1,4 +1,4 @@
-from tempfile import SpooledTemporaryFile
+from typing import Optional
 
 from fastapi import UploadFile
 
@@ -8,13 +8,14 @@ from src.db.session import ctx_session
 
 class DicomImageRepository:
     img_table = ImageData
+
     async def get(self, dicom_id: str) -> str:
         """
         :return: A file path 'openable' by python utils
         :raises FileNotFoundError if the file doesn't exist
         """
         session = ctx_session.get()
-        img: ImageData = session.query(ImageData).get({
+        img: Optional[ImageData] = session.get(ImageData, {
             "dicom_id": dicom_id
         })
 
@@ -32,5 +33,5 @@ class DicomImageRepository:
 
         return file_path
 
-    async def _save(selfs, dicom_id:str, file:UploadFile) -> str:
+    async def _save(selfs, dicom_id: str, file: UploadFile) -> str:
         raise NotImplementedError()

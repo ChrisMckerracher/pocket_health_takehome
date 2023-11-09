@@ -1,5 +1,4 @@
-from tempfile import SpooledTemporaryFile
-from typing import Any
+from typing import Optional
 
 from fastapi import UploadFile
 
@@ -22,7 +21,7 @@ class DicomFileRepository:
         :raises FileNotFoundError if the file doesn't exist
         """
         session = ctx_session.get()
-        dicom: Dicom = session.query(Dicom).get({
+        dicom: Optional[Dicom] = session.get(Dicom, {
             "id": dicom_id
         })
 

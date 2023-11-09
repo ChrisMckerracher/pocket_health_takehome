@@ -42,7 +42,7 @@ async def post_file(patient_id: str, body: UploadFile, access_token: Annotated[s
         assert_permission(access_token, patient_id)
 
         # sha the file
-        id = uuid.uuid4().__str__()
+        id = str(uuid.uuid4())
 
         await environment.dicom_file_repository.save(patient_id, body.filename, id, body)
         await body.seek(0)

@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import Union, List, ForwardRef, Generic, TypeVar, get_args
 
 from deepdiff import DeepDiff
@@ -10,6 +9,7 @@ DataSet = List[ForwardRef("DicomTag")]
 literals_T = Union[str, int, float, bytes]
 bound_T = Union[literals_T, List[literals_T], List[DataSet]]
 T = TypeVar("T", bound=bound_T)
+
 
 class DicomTag(BaseModel, Generic[T]):
     group_id: int

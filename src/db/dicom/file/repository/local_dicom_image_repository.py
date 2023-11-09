@@ -1,5 +1,3 @@
-import os
-
 from PIL import Image
 
 from src.db.dicom.file.repository.dicom_image_repository import DicomImageRepository

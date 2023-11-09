@@ -27,4 +27,5 @@ def create_dev_environment() -> Environment:
     dicom_tag_repository = SqlDicomTagRepository()
     dicom_img_repository = LocalDicomImageRepository()
 
-    return Environment(engine=engine, dicom_file_repository=dicom_file_repository, dicom_tag_repository=dicom_tag_repository, dicom_img_repository=dicom_img_repository)
+    return Environment(engine=engine, dicom_file_repository=dicom_file_repository,
+                       dicom_tag_repository=dicom_tag_repository, dicom_img_repository=dicom_img_repository)
