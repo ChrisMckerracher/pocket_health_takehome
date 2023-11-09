@@ -2,6 +2,7 @@
 # Running and Testing
 ## Testing and Running locally
 **Note** Currently this app doesn't support Windows, due to a difference in filesystem layout compared to POSIX environments
+**Note** Python>=3.10 is required
 
 We need to first install the requirements as listed in setup.py. To do this, you can run the following:
 ```
