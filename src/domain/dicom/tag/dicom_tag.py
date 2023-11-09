@@ -11,12 +11,6 @@ literals_T = Union[str, int, float, bytes]
 bound_T = Union[literals_T, List[literals_T], List[DataSet]]
 T = TypeVar("T", bound=bound_T)
 
-
-class TagMap(Enum):
-    pass
-    # "00010002" = (vr,name)
-
-
 class DicomTag(BaseModel, Generic[T]):
     group_id: int
     element_id: int
@@ -30,6 +24,11 @@ class DicomTag(BaseModel, Generic[T]):
 
     @staticmethod
     def from_data_element(tag: DataElement) -> ForwardRef("DicomTag"):
+        """
+
+        :param tag: The pydicom dataelement
+        :return: A tag entity representation of the dataelement
+        """
         vr = tag.VR
         group_id = tag.tag.group
         element_id = tag.tag.element

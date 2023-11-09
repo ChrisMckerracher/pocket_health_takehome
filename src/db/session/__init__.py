@@ -4,6 +4,9 @@ from src.db.session.SessionFactory import SessionFactory
 
 
 class CtxSession:
+    """
+    This is effectively a singleton that allows sql repositories to access the scoped session context
+    """
     ctx_session: SessionFactory = None
 
     @staticmethod

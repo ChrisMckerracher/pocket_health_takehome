@@ -9,6 +9,10 @@ from src.db.session import ctx_session
 class DicomImageRepository:
     img_table = ImageData
     async def get(self, dicom_id: str) -> str:
+        """
+        :return: A file path 'openable' by python utils
+        :raises FileNotFoundError if the file doesn't exist
+        """
         session = ctx_session.get()
         img: ImageData = session.query(ImageData).get({
             "dicom_id": dicom_id

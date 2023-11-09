@@ -15,7 +15,7 @@ SqlDataSet = List[DataSetItem]
 
 
 @dataclass
-class DataSetTreeNode:
+class DataSetItemTreeNode:
     id: str
     set_id : str = field(default=None)
     children: Set[ForwardRef("DataSetTreeNode")] = field(default_factory=set)
@@ -24,14 +24,24 @@ class DataSetTreeNode:
         return hash(self.id)
 
 
-# ToDo: what if a dataset has two sq objects in it? then datasets dont just have parents
 def transform(dataset_items: List[DataSetItem]) -> DicomTag:
-    root: DataSetTreeNode = construct_tree(dataset_items)
+    """
+
+    :param dataset_items: A flat list of datasetitems representing a dicom tag
+    :return: a DicomTag entity from the original flat representation
+    """
+    root: DataSetItemTreeNode = construct_tree(dataset_items)
     dataset_map: Dict[str, DataSetItem] = construct_map(dataset_items)
     return traverse_tree(root, dataset_map)
 
 
-def traverse_tree(root: DataSetTreeNode, dataset_map: Dict[str, DataSetItem]) -> DicomTag:
+def traverse_tree(root: DataSetItemTreeNode, dataset_map: Dict[str, DataSetItem]) -> DicomTag:
+    """
+
+    :param root: The root of the datasetitem tree
+    :param dataset_map: The map of id to datasetitem to retrieve while traversing the treee
+    :return: The DicomTag from the tree representation
+    """
     root_id = root.id
     dataset_item = dataset_map.get(root_id)
     if root.children:
@@ -62,17 +72,19 @@ def construct_map(dataset_items: List[DataSetItem]) -> Dict[str, DataSetItem]:
     return item_map
 
 
-def construct_tree(dataset_items: List[DataSetItem]) -> DataSetTreeNode:
-    # ToDo: data validation to ensure root is set, or throw error
-    root: DataSetTreeNode
-    tree_map: Dict[str, DataSetTreeNode] = {}
+def construct_tree(dataset_items: List[DataSetItem]) -> DataSetItemTreeNode:
+    """
+    Construct a hierarchical tree from the flat list
+    """
+    root: DataSetItemTreeNode
+    tree_map: Dict[str, DataSetItemTreeNode] = {}
 
     for item in dataset_items:
         item: DataSetItem
         parent_id = item.parent_id
         set_id = item.data_set_id
         if item.id not in tree_map:
-            tree_node = DataSetTreeNode(id=item.id, set_id=set_id)
+            tree_node = DataSetItemTreeNode(id=item.id, set_id=set_id)
             tree_map[item.id] = tree_node
         else:
             tree_node = tree_map[item.id]
@@ -81,7 +93,7 @@ def construct_tree(dataset_items: List[DataSetItem]) -> DataSetTreeNode:
         if parent_id:
             parent_tree_node = tree_map.get(parent_id)
             if not parent_tree_node:
-                parent_tree_node = DataSetTreeNode(id=parent_id)
+                parent_tree_node = DataSetItemTreeNode(id=parent_id)
                 tree_map[parent_id] = parent_tree_node
             parent_tree_node.children.add(tree_node)
         else:

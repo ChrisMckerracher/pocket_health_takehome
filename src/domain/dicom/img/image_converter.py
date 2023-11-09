@@ -6,6 +6,11 @@ class ImageConverter:
 
     @staticmethod
     def convert(np_array: numpy.ndarray) -> Image:
+        """
+        Converts a numpy array with image data into an image
+        :param np_array:
+        :return:
+        """
         np_array = np_array.astype(float)
 
         # https://pycad.co/how-to-convert-a-dicom-image-into-jpg-or-png/
