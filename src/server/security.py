@@ -22,6 +22,9 @@ def assert_permission(access_token, patient_id: str):
     Assert that the access_token pertains to the patient_id
     :raises AccessViolationException if the access_token doesn't pertain to the patient_id
     """
-    access_token = jwt.decode(access_token, public_key, algorithms=algo)
+    try:
+        access_token = jwt.decode(access_token, public_key, algorithms=algo)
+    except Exception as e:
+        raise AccessViolationException()
     if access_token["patient_id"] != patient_id:
         raise AccessViolationException()

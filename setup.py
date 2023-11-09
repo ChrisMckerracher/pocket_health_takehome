@@ -9,7 +9,8 @@ install_requires = [
     "deepdiff==6.7.0",
     "numpy==1.26.1",
     "pillow==10.1.0",
-    "uvicorn==0.24.0.post1"
+    "uvicorn==0.24.0.post1",
+    "pytest==7.4.3"
 ]
 
 setup(

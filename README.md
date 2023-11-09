@@ -18,6 +18,7 @@ wc -c assets/*.dcm
 
 once this is done, you can run all tests via:  
 ```
+pip install pytest
 pytest test
 ```
 
